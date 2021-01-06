@@ -51,6 +51,13 @@ function configure_mhs_inbound_url {
 
 command="$1"
 case "${command}" in
+  _test_lint)
+      npm install
+      npm run lint
+      ;;
+  test_lint)
+      dojo "./tasks _test_lint"
+      ;;
   _test_e2e)
       npm install
       npm run test

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import adapter from 'axios/lib/adapters/http';
 import { v4 } from 'uuid';
-import { config } from "../config";
+import { config } from '../config';
 import { generateEhrExtractResponse } from './ehr-extract-template';
 
 export const addRecordToEhrRepo = async nhsNumber => {

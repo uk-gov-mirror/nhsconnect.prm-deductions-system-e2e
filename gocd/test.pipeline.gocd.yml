@@ -22,15 +22,26 @@ pipelines:
     stages:
       - test:
           clean_workspace: true
-          resources:
-            - deductions-private
-            - dev
-          tasks:
-            - exec:
-                command: /bin/bash
-                arguments:
-                  - -c
-                  - ./tasks test_e2e
+          jobs:
+            test_lint:
+              resources:
+                - docker
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks test_lint
+            test_e2e:
+              resources:
+                - deductions-private
+                - dev
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks test_e2e
   'prm-deductions-system-e2e.test':
     group: deductions
     label_template: '${git[:8]}'
@@ -53,12 +64,23 @@ pipelines:
     stages:
       - test:
           clean_workspace: true
-          resources:
-            - deductions-private
-            - test
-          tasks:
-            - exec:
-                command: /bin/bash
-                arguments:
-                  - -c
-                  - ./tasks test_e2e
+          jobs:
+            test_lint:
+              resources:
+                - docker
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks test_lint
+            test_e2e:
+              resources:
+                - deductions-private
+                - test
+              tasks:
+                - exec:
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks test_e2e

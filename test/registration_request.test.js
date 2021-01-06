@@ -2,7 +2,7 @@ import axios from 'axios';
 import adapter from 'axios/lib/adapters/http';
 import { v4 } from 'uuid';
 import { config } from '../config';
-import { addRecordToEhrRepo } from "../utils/add-record-to-ehr-repo";
+import { addRecordToEhrRepo } from '../utils/add-record-to-ehr-repo';
 import { emisEhrRequestTemplate } from './data/emis_ehr_request';
 
 const generateEhrRequest = (conversationId, nhsNumber, odsCode) => {
@@ -37,20 +37,16 @@ describe('EMIS registration requests', () => {
       const ehrRepoKey = config.ehrRepoAuthKeys;
 
       try {
-        await axios.get(
-          `${ehrRepoUrl}/patients/${nhsNumber}`,
-          {
-            headers: { Authorization: ehrRepoKey },
-            adapter
-          }
-        );
+        await axios.get(`${ehrRepoUrl}/patients/${nhsNumber}`, {
+          headers: { Authorization: ehrRepoKey },
+          adapter
+        });
         console.log('EHR found for patient:', nhsNumber);
-      } catch(err) {
+      } catch (err) {
         if (err.response && err.response.status === 404) {
           await addRecordToEhrRepo(nhsNumber);
         }
-       }
-
+      }
 
       // Action: send an EHR request to MHS Adapter inbound
       const mhsInboundUrl = config.mhsInboundUrl;
