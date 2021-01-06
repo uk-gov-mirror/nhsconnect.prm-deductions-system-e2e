@@ -1,6 +1,6 @@
 format_version: 4
 pipelines:
-  'system-e2e.dev':
+  'prm-deductions-system-e2e.dev':
     group: deductions
     label_template: '${git[:8]}'
     materials:
@@ -31,7 +31,7 @@ pipelines:
                 arguments:
                   - -c
                   - ./tasks test_e2e
-  'system-e2e.test':
+  'prm-deductions-system-e2e.test':
     group: deductions
     label_template: '${git[:8]}'
     materials:
