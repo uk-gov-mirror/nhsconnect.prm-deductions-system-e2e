@@ -7,7 +7,7 @@ set -Eeo pipefail
 ###########################
 
 AWS_DEFAULT_REGION=eu-west-2
-export NHS_SERVICE=repo-to-gp
+export NHS_SERVICE=system-e2e
 
 ####################################
 # Instance (Environment) Variables #
@@ -16,6 +16,13 @@ export NHS_SERVICE=repo-to-gp
 function check_env {
   if [[ -z "${NHS_ENVIRONMENT}" ]]; then
     echo "Must set NHS_ENVIRONMENT"
+    exit 1
+  fi
+}
+
+function check_nhs_service {
+  if [[ -z "${NHS_SERVICE}" ]]; then
+    echo "Must set NHS_SERVICE"
     exit 1
   fi
 }
@@ -45,12 +52,62 @@ function configure_mhs_inbound_url {
   fi
 }
 
+####################
+# Script Functions #
+####################
+
+function get_aws_ssm_secret {
+   secret_id=$1
+   json=$(dojo -c Dojofile-infra "aws ssm get-parameter --with-decryption --region $AWS_DEFAULT_REGION --name $secret_id")
+   if [ $? != 0 ]; then
+     >&2 echo "Failed to obtain AWS secret from SSM: $secret_id"
+     exit 5
+   fi
+   echo $json | jq -r ".Parameter.Value"
+}
+
+function send_canary_update_message {
+  check_nhs_service
+  node scripts/send-canary-update.js $(npm outdated --parseable)
+}
+
+function configure_hangout_webhook {
+  export GOOGLE_CHAT_CANARY_WEBHOOK=$(get_aws_ssm_secret "/repo/prod/user-input/gocd-google-chat-canary-webhook")
+  if [ -z "${GOOGLE_CHAT_CANARY_WEBHOOK}" ]; then
+    echo "Unable to obtain GOOGLE_CHAT_CANARY_WEBHOOK from AWS"
+    exit 5
+  fi
+}
+
 ###########
 ## TASKS ##
 ###########
 
 command="$1"
 case "${command}" in
+  update_package_json)
+      dojo "npx npm-check-updates -u"
+      ;;
+  send_dead_canary_message)
+      check_nhs_service
+      configure_hangout_webhook
+      dojo "node scripts/send-canary-error.js"
+      ;;
+  _dep)
+      npm install
+      npm audit
+      ;;
+  dep)
+      dojo "./tasks _dep"
+      ;;
+  _list_outdated)
+      npm install
+      npm outdated > outdated-dependencies.txt || send_canary_update_message
+      ;;
+  list_outdated)
+      configure_hangout_webhook
+      dojo "./tasks _list_outdated"
+      ;;
   _test_lint)
       npm install
       npm run lint
