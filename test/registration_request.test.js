@@ -3,14 +3,10 @@ import adapter from 'axios/lib/adapters/http';
 import { v4 } from 'uuid';
 import { config } from '../config';
 import { addRecordToEhrRepo } from '../utils/add-record-to-ehr-repo';
-import { emisEhrRequestTemplate } from './data/emis_ehr_request';
-
-const generateEhrRequest = (conversationId, nhsNumber, odsCode) => {
-  return emisEhrRequestTemplate
-    .replace('${conversationId}', conversationId)
-    .replace('${nhsNumber}', nhsNumber)
-    .replace('${odsCode}', odsCode);
-};
+import {
+  generateEmisEhrRequestTemplateInbound,
+  generateEmisEhrRequestTemplateOutbound
+} from './data/emis-ehr-request';
 
 describe('EMIS registration requests', () => {
   const RETRY_COUNT = 20;
@@ -23,7 +19,9 @@ describe('EMIS registration requests', () => {
       const testData = {
         dev: {
           odsCode: 'A91720',
-          nhsNumber: '9692842304'
+          asid: '918999198820',
+          nhsNumber: '9692842304',
+          repoOdsCode: 'A91521'
         },
         test: {
           odsCode: 'N82668',
@@ -33,7 +31,7 @@ describe('EMIS registration requests', () => {
 
       // Setup: add an EHR to the repo
       const ehrRepoUrl = `https://${config.nhsEnvironment}.ehr-repo.patient-deductions.nhs.uk`;
-      const { nhsNumber, odsCode } = testData[config.nhsEnvironment];
+      const { nhsNumber, odsCode, repoOdsCode, asid } = testData[config.nhsEnvironment];
       const ehrRepoKey = config.ehrRepoAuthKeys;
 
       try {
@@ -48,20 +46,58 @@ describe('EMIS registration requests', () => {
         }
       }
 
-      // Action: send an EHR request to MHS Adapter inbound
-      const mhsInboundUrl = config.mhsInboundUrl;
       const conversationId = v4();
-      const ehrRequest = generateEhrRequest(conversationId, nhsNumber, odsCode);
+      const interactionId = 'RCMR_IN010000UK05';
 
-      const headers = {
-        Soapaction: 'urn:nhs:names:services:gp2gp/RCMR_IN010000UK05',
-        'Content-Type':
-          'multipart/related;charset="UTF-8";type="text/xml";boundary="0adedbcc-ed0f-415d-8091-4e816bf9d86f";start="<ContentRoot>"'
-      };
+      // Action: send an EHR request to MHS Adapter inbound/ test harness MHS outbound
+      if (config.useTestHarness === 'true') {
+        const mhsOutboundTestHarnessUrl = config.mhsOutboundTestHarnessUrl;
+        const headers = {
+          'Content-Type': 'application/json',
+          'Interaction-ID': interactionId,
+          'Sync-Async': false,
+          'Correlation-Id': conversationId,
+          // who will send the record - repo
+          'Ods-Code': repoOdsCode,
+          // who is requesting the record - test-harness
+          'from-asid': asid
+        };
 
-      await axios.post(mhsInboundUrl, ehrRequest, { headers: headers, adapter }).catch(() => {
-        console.log("MHS can't handle this message so it returns with 500");
-      });
+        const ehrRequest = generateEmisEhrRequestTemplateOutbound(
+          conversationId,
+          nhsNumber,
+          odsCode,
+          asid
+        );
+
+        const body = {
+          payload: ehrRequest
+        };
+
+        await axios
+          .post(mhsOutboundTestHarnessUrl, body, { headers: headers, adapter })
+          .catch(e => {
+            console.log('Sending EHR request to test harness MHS outbound failed', e);
+          });
+      } else {
+        const mhsInboundUrl = config.mhsInboundUrl;
+        const headers = {
+          Soapaction: interactionId,
+          'Content-Type':
+            'multipart/related;charset="UTF-8";type="text/xml";boundary="0adedbcc-ed0f-415d-8091-4e816bf9d86f";start="<ContentRoot>"'
+        };
+
+        const ehrRequest = generateEmisEhrRequestTemplateInbound(
+          conversationId,
+          nhsNumber,
+          odsCode,
+          asid
+        );
+
+        await axios.post(mhsInboundUrl, ehrRequest, { headers: headers, adapter }).catch(e => {
+          console.log("MHS can't handle this message so it returns with 500", e);
+        });
+      }
 
       console.log('ConversationId:', conversationId);
 
@@ -93,16 +129,13 @@ const getRegistrationDetails = async conversationId => {
   const repoToGpAuthKeys = config.repoToGpAuthKeys;
 
   try {
-    const registrationDetailsResp = await axios.get(
-      `${repoToGpUrl}/registration-requests/${conversationId}`,
-      {
-        headers: { Authorization: repoToGpAuthKeys },
-        adapter
-      }
-    );
-    return registrationDetailsResp.data.data.attributes;
+    const res = await axios.get(`${repoToGpUrl}/registration-requests/${conversationId}`, {
+      headers: { Authorization: repoToGpAuthKeys },
+      adapter
+    });
+    return res.data.data.attributes;
   } catch (err) {
-    console.log(err);
+    console.log(err.response.status);
     return {};
   }
 };

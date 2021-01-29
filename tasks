@@ -52,6 +52,10 @@ function configure_mhs_inbound_url {
   fi
 }
 
+function configure_mhs_outbound_test_harness_url {
+  export MHS_OUTBOUND_TEST_HARNESS_URL=https://mhs-outbound-dev.test-harness-mhs.patient-deductions.nhs.uk
+}
+
 ####################
 # Script Functions #
 ####################
@@ -119,12 +123,21 @@ case "${command}" in
       npm install
       npm run test
       ;;
-  test_e2e)
+  test_e2e_repo)
       check_env
       get_aws_account_id
       configure_repo_to_gp_service_auth_keys
       configure_ehr_repo_service_auth_keys
       configure_mhs_inbound_url
+      dojo "./tasks _test_e2e"
+      ;;
+  test_e2e_test_harness)
+      check_env
+      get_aws_account_id
+      export USE_TEST_HARNESS=true
+      configure_repo_to_gp_service_auth_keys
+      configure_ehr_repo_service_auth_keys
+      configure_mhs_outbound_test_harness_url
       dojo "./tasks _test_e2e"
       ;;
   *)
