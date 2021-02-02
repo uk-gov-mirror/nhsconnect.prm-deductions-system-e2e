@@ -1,8 +1,13 @@
 import stompit from 'stompit';
 import { config } from '../config';
 
+const getHost = function () {
+  const hostAndPort = config.amqQueueUrl.split('//')[1];
+  return hostAndPort.split(':')[0];
+};
+
 const connectOptions = {
-  host: config.queueUrl,
+  host: getHost(),
   port: 61614,
   ssl: true,
   connectHeaders: {

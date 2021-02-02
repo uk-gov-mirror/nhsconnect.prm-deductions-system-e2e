@@ -46,8 +46,10 @@ function configure_ehr_repo_service_auth_keys {
 function configure_queue_access {
   queue_username_parameter_name="/repo/${NHS_ENVIRONMENT}/user-input/mq-app-username"
   queue_password_parameter_name="/repo/${NHS_ENVIRONMENT}/user-input/mq-app-password"
+  amqp_queue_url_parameter_name="/repo/${NHS_ENVIRONMENT}/output/prm-deductions-infra/amqp-endpoint-active"
   export QUEUE_USERNAME=$(dojo -c Dojofile-infra "aws ssm get-parameter --with-decryption --region ${AWS_DEFAULT_REGION} --name  ${queue_username_parameter_name} | jq -r .Parameter.Value")
   export QUEUE_PASSWORD=$(dojo -c Dojofile-infra "aws ssm get-parameter --with-decryption --region ${AWS_DEFAULT_REGION} --name  ${queue_password_parameter_name} | jq -r .Parameter.Value")
+  export AMQP_QUEUE_URL=$(dojo -c Dojofile-infra "aws ssm get-parameter --with-decryption --region ${AWS_DEFAULT_REGION} --name  ${amqp_queue_url_parameter_name} | jq -r .Parameter.Value")
 }
 
 function configure_mhs_inbound_url {

@@ -3,7 +3,7 @@ export const config = {
   mhsInboundUrl: process.env.MHS_INBOUND_URL,
   repoToGpAuthKeys: process.env.REPO_TO_GP_AUTHORIZATION_KEYS,
   ehrRepoAuthKeys: process.env.EHR_REPO_AUTHORIZATION_KEYS,
-  queueUrl: process.env.QUEUE_URL,
+  amqQueueUrl: process.env.AMQP_QUEUE_URL,
   queueUsername: process.env.QUEUE_USERNAME,
   queuePassword: process.env.QUEUE_PASSWORD,
 };

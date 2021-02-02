@@ -85,7 +85,7 @@ describe('EMIS registration requests', () => {
       connectToQueueAndAssert(body => {
         expect(body).toContain(nhsNumber);
         expect(body).toContain(EHR_EXTRACT_INTERACTION_ID);
-        expect(body).toContain(conversationId.toUpperCase());
+        expect(body).toContain(conversationId);
         done();
       });
     },
