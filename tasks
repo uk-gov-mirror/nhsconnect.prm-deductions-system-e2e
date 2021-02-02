@@ -43,6 +43,13 @@ function configure_ehr_repo_service_auth_keys {
   export EHR_REPO_AUTHORIZATION_KEYS=$(dojo -c Dojofile-infra "aws ssm get-parameter --with-decryption --region ${AWS_DEFAULT_REGION} --name  ${parameter_name} | jq -r .Parameter.Value")
 }
 
+function configure_queue_access {
+  queue_username_parameter_name="/repo/${NHS_ENVIRONMENT}/user-input/mq-app-username"
+  queue_password_parameter_name="/repo/${NHS_ENVIRONMENT}/user-input/mq-app-password"
+  export QUEUE_USERNAME=$(dojo -c Dojofile-infra "aws ssm get-parameter --with-decryption --region ${AWS_DEFAULT_REGION} --name  ${queue_username_parameter_name} | jq -r .Parameter.Value")
+  export QUEUE_PASSWORD=$(dojo -c Dojofile-infra "aws ssm get-parameter --with-decryption --region ${AWS_DEFAULT_REGION} --name  ${queue_password_parameter_name} | jq -r .Parameter.Value")
+}
+
 function configure_mhs_inbound_url {
   check_env
   if [[ $NHS_ENVIRONMENT == "dev" ]]; then
@@ -122,6 +129,7 @@ case "${command}" in
   test_e2e)
       check_env
       get_aws_account_id
+      configure_queue_access
       configure_repo_to_gp_service_auth_keys
       configure_ehr_repo_service_auth_keys
       configure_mhs_inbound_url

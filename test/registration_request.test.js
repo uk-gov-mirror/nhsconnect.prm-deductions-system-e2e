@@ -4,6 +4,7 @@ import { v4 } from 'uuid';
 import { config } from '../config';
 import { addRecordToEhrRepo } from '../utils/add-record-to-ehr-repo';
 import { emisEhrRequestTemplate } from './data/emis_ehr_request';
+import { connectToQueueAndAssert } from '../utils/handle-queue';
 
 const generateEhrRequest = (conversationId, nhsNumber, odsCode) => {
   return emisEhrRequestTemplate
@@ -19,7 +20,7 @@ describe('EMIS registration requests', () => {
 
   it(
     'should capture a registration request',
-    async () => {
+    async done => {
       const testData = {
         dev: {
           odsCode: 'A91720',
@@ -35,6 +36,7 @@ describe('EMIS registration requests', () => {
       const ehrRepoUrl = `https://${config.nhsEnvironment}.ehr-repo.patient-deductions.nhs.uk`;
       const { nhsNumber, odsCode } = testData[config.nhsEnvironment];
       const ehrRepoKey = config.ehrRepoAuthKeys;
+      const EHR_EXTRACT_INTERACTION_ID = 'RCMR_IN030000UK06';
 
       try {
         await axios.get(`${ehrRepoUrl}/patients/${nhsNumber}`, {
@@ -79,6 +81,13 @@ describe('EMIS registration requests', () => {
       }
 
       expect(registrationStatus).toEqual(expectedStatus);
+
+      connectToQueueAndAssert(body => {
+        expect(body).toContain(nhsNumber);
+        expect(body).toContain(EHR_EXTRACT_INTERACTION_ID);
+        expect(body).toContain(conversationId.toUpperCase());
+        done();
+      });
     },
     TEST_TIMEOUT
   );
