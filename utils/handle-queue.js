@@ -2,8 +2,7 @@ import stompit from 'stompit';
 import { config } from '../config';
 
 const getHost = function () {
-  const hostAndPort = config.amqQueueUrl.split('//')[1];
-  return hostAndPort.split(':')[0];
+  return !!config.amqQueueUrl && config.amqQueueUrl.split('//')[1].split(':')[0];
 };
 
 const connectOptions = {

@@ -41,7 +41,7 @@ pipelines:
                     command: /bin/bash
                     arguments:
                       - -c
-                      - ./tasks test_e2e
+                      - ./tasks test_e2e_test_harness
   'prm-deductions-system-e2e.test':
     group: deductions
     label_template: '${git[:8]}'

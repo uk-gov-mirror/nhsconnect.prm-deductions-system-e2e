@@ -82,12 +82,15 @@ describe('EMIS registration requests', () => {
 
       expect(registrationStatus).toEqual(expectedStatus);
 
-      connectToQueueAndAssert(body => {
-        expect(body).toContain(nhsNumber);
-        expect(body).toContain(EHR_EXTRACT_INTERACTION_ID);
-        expect(body).toContain(conversationId);
-        done();
-      });
+      if (config.useTestHarness) {
+        connectToQueueAndAssert(body => {
+          expect(body).toContain(nhsNumber);
+          expect(body).toContain(EHR_EXTRACT_INTERACTION_ID);
+          expect(body).toContain(conversationId);
+          done();
+        });
+      }
+      done();
     },
     TEST_TIMEOUT
   );

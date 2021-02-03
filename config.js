@@ -6,4 +6,5 @@ export const config = {
   amqQueueUrl: process.env.AMQP_QUEUE_URL,
   queueUsername: process.env.QUEUE_USERNAME,
   queuePassword: process.env.QUEUE_PASSWORD,
+  useTestHarness: process.env.USE_TEST_HARNESS === "true"
 };

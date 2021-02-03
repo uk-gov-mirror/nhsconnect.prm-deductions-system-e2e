@@ -131,6 +131,15 @@ case "${command}" in
   test_e2e)
       check_env
       get_aws_account_id
+      configure_repo_to_gp_service_auth_keys
+      configure_ehr_repo_service_auth_keys
+      configure_mhs_inbound_url
+      dojo "./tasks _test_e2e"
+      ;;
+  test_e2e_test_harness)
+      check_env
+      get_aws_account_id
+      export USE_TEST_HARNESS=true
       configure_queue_access
       configure_repo_to_gp_service_auth_keys
       configure_ehr_repo_service_auth_keys
