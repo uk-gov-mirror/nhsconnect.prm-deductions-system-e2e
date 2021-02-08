@@ -9,8 +9,8 @@ export const addRecordToEhrRepo = async nhsNumber => {
   const ehrRepoKey = config.ehrRepoAuthKeys;
 
   //Post /fragments to get the pre-signed url for s3
-  const conversationId = v4().toUpperCase();
-  const messageId = v4().toUpperCase();
+  const conversationId = v4();
+  const messageId = v4();
   console.log('Conversation ID', conversationId);
   console.log('Message ID', messageId);
 
