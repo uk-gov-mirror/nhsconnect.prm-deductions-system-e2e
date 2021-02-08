@@ -17,6 +17,9 @@ pipelines:
       gp2gp-adaptor:
         pipeline: prm-deductions-gp2gp-adaptor.dev
         stage: deploy
+      ehr-repo:
+        pipeline: prm-deductions-ehr-repository.dev
+        stage: deploy
     environment_variables:
       NHS_ENVIRONMENT: dev
     stages:
@@ -58,6 +61,9 @@ pipelines:
         stage: deploy
       gp2gp-adaptor:
         pipeline: prm-deductions-gp2gp-adaptor.test
+        stage: deploy
+      ehr-repo:
+        pipeline: prm-deductions-ehr-repository.test
         stage: deploy
     environment_variables:
       NHS_ENVIRONMENT: test
