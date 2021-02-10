@@ -4,7 +4,7 @@ import { v4 } from 'uuid';
 import { config } from '../config';
 import { addRecordToEhrRepo } from '../utils/add-record-to-ehr-repo';
 import { emisEhrRequestTemplate } from './data/emis_ehr_request';
-import { connectToQueueAndAssert } from '../utils/handle-queue';
+import { connectToQueueAndAssert } from '../utils/queue/handle-queue';
 
 const generateEhrRequest = (conversationId, nhsNumber, odsCode) => {
   return emisEhrRequestTemplate
@@ -114,7 +114,7 @@ const getRegistrationDetails = async conversationId => {
     );
     return registrationDetailsResp.data.data.attributes;
   } catch (err) {
-    console.log(err);
+    console.log(err.response.status);
     return {};
   }
 };

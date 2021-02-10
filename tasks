@@ -136,6 +136,11 @@ case "${command}" in
       configure_mhs_inbound_url
       dojo "./tasks _test_e2e"
       ;;
+  _test_e2e_test_harness)
+      npm install
+      npm run queue:purge
+      npm run test
+      ;;
   test_e2e_test_harness)
       check_env
       get_aws_account_id
@@ -144,7 +149,7 @@ case "${command}" in
       configure_repo_to_gp_service_auth_keys
       configure_ehr_repo_service_auth_keys
       configure_mhs_inbound_url
-      dojo "./tasks _test_e2e"
+      dojo "./tasks _test_e2e_test_harness"
       ;;
   *)
       echo "Invalid command: '${command}'"
