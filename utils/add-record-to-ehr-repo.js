@@ -8,9 +8,9 @@ export const addRecordToEhrRepo = async nhsNumber => {
   const ehrRepoUrl = `https://${config.nhsEnvironment}.ehr-repo.patient-deductions.nhs.uk`;
   const ehrRepoKey = config.ehrRepoAuthKeys;
 
-  //Post /fragments to get the pre-signed url for s3
-  const conversationId = v4();
-  const messageId = v4();
+  // Testing uppercase IDs sanitization in ehr repo
+  const conversationId = v4().toUpperCase();
+  const messageId = v4().toUpperCase();
   console.log('Conversation ID', conversationId);
   console.log('Message ID', messageId);
 
@@ -21,6 +21,8 @@ export const addRecordToEhrRepo = async nhsNumber => {
     messageId,
     manifest: []
   };
+
+  //Post /fragments to get the pre-signed url for s3
   const generateS3UrlResp = await axios.post(`${ehrRepoUrl}/fragments`, createEntryInEhrRepoData, {
     headers: {
       Authorization: ehrRepoKey
