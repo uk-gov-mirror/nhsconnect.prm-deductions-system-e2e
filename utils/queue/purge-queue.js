@@ -61,14 +61,15 @@ const purgeQueue = () => {
         return;
       }
 
-      message.readString('utf-8', function (error) {
+      message.readString('utf-8', function (error, message) {
         if (error) {
           console.log('read message error ' + error.message);
           idleTimeout.stop();
           return;
         }
 
-        console.log('received message and acknowledged');
+        console.log('received message and acknowledged:');
+        console.log(message);
 
         idleTimeout.decrement();
       });
