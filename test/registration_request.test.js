@@ -39,7 +39,7 @@ describe('EMIS registration requests', () => {
       const EHR_EXTRACT_INTERACTION_ID = 'RCMR_IN030000UK06';
 
       try {
-        await axios.get(`${ehrRepoUrl}/patients/${nhsNumber}`, {
+        await axios.get(`${ehrRepoUrl}/new/patients/${nhsNumber}`, {
           headers: { Authorization: ehrRepoKey },
           adapter
         });
