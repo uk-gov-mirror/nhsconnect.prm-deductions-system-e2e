@@ -14,12 +14,15 @@ export const addRecordToEhrRepo = async nhsNumber => {
   console.log('Conversation ID', conversationId);
   console.log('Message ID', messageId);
 
-  const generateS3UrlResp = await axios.get(`${ehrRepoUrl}/messages/${conversationId}/${messageId}`, {
-    headers: {
-      Authorization: ehrRepoKey
-    },
-    adapter
-  });
+  const generateS3UrlResp = await axios.get(
+    `${ehrRepoUrl}/messages/${conversationId}/${messageId}`,
+    {
+      headers: {
+        Authorization: ehrRepoKey
+      },
+      adapter
+    }
+  );
   const s3Url = generateS3UrlResp.data;
   console.log('Pre-signed url', s3Url);
   const gp2gpMessage = generateEhrExtractResponse(nhsNumber, conversationId, messageId);
@@ -44,17 +47,12 @@ export const addRecordToEhrRepo = async nhsNumber => {
     }
   };
 
-
-  const patchResp = await axios.post(
-    `${ehrRepoUrl}/messages`,
-    postRequestBody,
-    {
-      headers: {
-        Authorization: ehrRepoKey
-      },
-      adapter
-    }
-  );
+  const patchResp = await axios.post(`${ehrRepoUrl}/messages`, postRequestBody, {
+    headers: {
+      Authorization: ehrRepoKey
+    },
+    adapter
+  });
 
   console.log('Patch response status', patchResp.status);
 };
