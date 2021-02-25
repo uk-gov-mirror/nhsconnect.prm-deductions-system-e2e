@@ -9,21 +9,12 @@ export const addRecordToEhrRepo = async nhsNumber => {
   const ehrRepoKey = config.ehrRepoAuthKeys;
 
   // Testing uppercase IDs sanitization in ehr repo
-  const conversationId = v4().toUpperCase();
-  const messageId = v4().toUpperCase();
+  const conversationId = v4();
+  const messageId = v4();
   console.log('Conversation ID', conversationId);
   console.log('Message ID', messageId);
 
-  const createEntryInEhrRepoData = {
-    nhsNumber,
-    conversationId,
-    isLargeMessage: false,
-    messageId,
-    manifest: []
-  };
-
-  //Post /fragments to get the pre-signed url for s3
-  const generateS3UrlResp = await axios.post(`${ehrRepoUrl}/fragments`, createEntryInEhrRepoData, {
+  const generateS3UrlResp = await axios.get(`${ehrRepoUrl}/messages/${conversationId}/${messageId}`, {
     headers: {
       Authorization: ehrRepoKey
     },
@@ -39,10 +30,24 @@ export const addRecordToEhrRepo = async nhsNumber => {
     console.log('Saving to s3 failed');
     return;
   }
-  // Patch /fragments to mark it as complete
-  const patchResp = await axios.patch(
-    `${ehrRepoUrl}/fragments`,
-    { conversationId, transferComplete: true },
+
+  const postRequestBody = {
+    data: {
+      type: 'messages',
+      id: messageId,
+      attributes: {
+        conversationId,
+        messageType: 'ehrExtract',
+        nhsNumber,
+        attachmentMessageIds: []
+      }
+    }
+  };
+
+
+  const patchResp = await axios.post(
+    `${ehrRepoUrl}/messages`,
+    postRequestBody,
     {
       headers: {
         Authorization: ehrRepoKey
