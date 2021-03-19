@@ -138,7 +138,7 @@ case "${command}" in
       ;;
   _test_e2e)
       npm install
-      npm run test
+      npm run test:testenv
       ;;
   test_e2e)
       check_env

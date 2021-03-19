@@ -6,64 +6,62 @@ import { connectToQueueAndAssert } from '../utils/queue/handle-queue';
 
 describe('largeDeductionRequest', () => {
   it('should send continue request when large health record extract received', async done => {
-    if (config.useTestHarness) {
-      const nhsNumber = `9692842312`;
-      const testHarnessOdsCode = 'A91720';
-      const CONTINUE_REQUEST_INTERACTION_ID = 'COPC_IN000001UK01';
-      const mhsInboundUrl = config.mhsInboundUrl;
+    const nhsNumber = `9692842312`;
+    const testHarnessOdsCode = 'A91720';
+    const CONTINUE_REQUEST_INTERACTION_ID = 'COPC_IN000001UK01';
+    const mhsInboundUrl = config.mhsInboundUrl;
 
-      // retrieve patient details from pds
-      const pdsDetails = await getAndValidatePatientPdsDetails(nhsNumber);
-      console.log(`Retrieved patient details from pds: old ods code: ${pdsDetails.odsCode}`);
+    // retrieve patient details from pds
+    const pdsDetails = await getAndValidatePatientPdsDetails(nhsNumber);
+    console.log(`Retrieved patient details from pds: old ods code: ${pdsDetails.odsCode}`);
 
-      // if patient's ods code isn't test harness, reassign them
-      if (pdsDetails.odsCode !== testHarnessOdsCode) {
-        await updateAndValidatePatientOdsCode(
-          nhsNumber,
-          pdsDetails.patientPdsId,
-          pdsDetails.serialChangeNumber,
-          testHarnessOdsCode,
-          pdsDetails.conversationId
-        );
-        console.log('Updated patients ods code to test harness ods code');
-      }
-
-      // trigger deduction in gp to repo from test harness/gp practice
-      const conversationId = await makeDeductionRequest(nhsNumber);
-      console.log(`Triggered deduction request, ConversationID: ${conversationId}`);
-
-      // Create large message response
-      const largeHealthRecordExtract = generateLargeHealthRecordExtract(
-        conversationId,
+    // if patient's ods code isn't test harness, reassign them
+    if (pdsDetails.odsCode !== testHarnessOdsCode) {
+      await updateAndValidatePatientOdsCode(
         nhsNumber,
-        testHarnessOdsCode
+        pdsDetails.patientPdsId,
+        pdsDetails.serialChangeNumber,
+        testHarnessOdsCode,
+        pdsDetails.conversationId
       );
-      console.log('Generated large health record');
-
-      // Add large message to MHS Inbound
-      const headers = {
-        Soapaction: 'urn:nhs:names:services:gp2gp/RCMR_IN030000UK06',
-        'Content-Type':
-          'multipart/related;charset="UTF-8";type="text/xml";boundary="2f5a95be-81e0-4f4a-b62f-88c3a02a697c";start="<ContentRoot>"'
-      };
-
-      await axios
-        .post(mhsInboundUrl, largeHealthRecordExtract, { headers: headers, adapter })
-        .catch(() => {
-          console.log("MHS can't handle this message so it returns with 500");
-        });
-
-      console.log('Added health record to mhs inbound');
-
-      await sleep(5000);
-
-      // Wait for continue message in test harness queue
-      connectToQueueAndAssert(body => {
-        expect(body).toContain(CONTINUE_REQUEST_INTERACTION_ID);
-        expect(body).toContain(conversationId.toUpperCase());
-        done();
-      });
+      console.log('Updated patients ods code to test harness ods code');
     }
+
+    // trigger deduction in gp to repo from test harness/gp practice
+    const conversationId = await makeDeductionRequest(nhsNumber);
+    console.log(`Triggered deduction request, ConversationID: ${conversationId}`);
+
+    // Create large message response
+    const largeHealthRecordExtract = generateLargeHealthRecordExtract(
+      conversationId,
+      nhsNumber,
+      testHarnessOdsCode
+    );
+    console.log('Generated large health record');
+
+    // Add large message to MHS Inbound
+    const headers = {
+      Soapaction: 'urn:nhs:names:services:gp2gp/RCMR_IN030000UK06',
+      'Content-Type':
+        'multipart/related;charset="UTF-8";type="text/xml";boundary="2f5a95be-81e0-4f4a-b62f-88c3a02a697c";start="<ContentRoot>"'
+    };
+
+    await axios
+      .post(mhsInboundUrl, largeHealthRecordExtract, { headers: headers, adapter })
+      .catch(() => {
+        console.log("MHS can't handle this message so it returns with 500");
+      });
+
+    console.log('Added health record to mhs inbound');
+
+    await sleep(5000);
+
+    // Wait for continue message in test harness queue
+    connectToQueueAndAssert(body => {
+      expect(body).toContain(CONTINUE_REQUEST_INTERACTION_ID);
+      expect(body).toContain(conversationId.toUpperCase());
+      done();
+    });
   }, 10000);
 });
 
