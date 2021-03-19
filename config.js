@@ -2,6 +2,8 @@ export const config = {
   nhsEnvironment: process.env.NHS_ENVIRONMENT,
   mhsInboundUrl: process.env.MHS_INBOUND_URL,
   repoToGpAuthKeys: process.env.REPO_TO_GP_AUTHORIZATION_KEYS,
+  gpToRepoAuthKeys: process.env.GP_TO_REPO_AUTHORIZATION_KEYS,
+  gp2gpAdaptorAuthKeys: process.env.GP2GP_ADAPTOR_AUTHORIZATION_KEYS,
   ehrRepoAuthKeys: process.env.EHR_REPO_AUTHORIZATION_KEYS,
   amqQueueUrl: process.env.AMQP_QUEUE_URL,
   queueUsername: process.env.QUEUE_USERNAME,

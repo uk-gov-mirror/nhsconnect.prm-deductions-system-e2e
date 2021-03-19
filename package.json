@@ -4,7 +4,7 @@
   "scripts": {
     "lint": "eslint test/ utils/",
     "lint:fix": "npm run lint -- --fix",
-    "test": "npm run lint:fix && jest test/",
+    "test": "npm run lint:fix && jest --runInBand --detectOpenHandles test/",
     "queue:purge": "babel-node utils/queue/purge-queue.js"
   },
   "repository": {

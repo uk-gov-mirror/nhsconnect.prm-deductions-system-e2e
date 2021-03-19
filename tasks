@@ -37,6 +37,18 @@ function configure_repo_to_gp_service_auth_keys {
   export REPO_TO_GP_AUTHORIZATION_KEYS=$(dojo -c Dojofile-infra "aws ssm get-parameter --with-decryption --region ${AWS_DEFAULT_REGION} --name  ${parameter_name} | jq -r .Parameter.Value")
 }
 
+function configure_gp_to_repo_service_auth_keys {
+  parameter_name="/repo/${NHS_ENVIRONMENT}/user-input/gp-to-repo-authorization-keys"
+  echo "${parameter_name}"
+  export GP_TO_REPO_AUTHORIZATION_KEYS=$(dojo -c Dojofile-infra "aws ssm get-parameter --with-decryption --region ${AWS_DEFAULT_REGION} --name  ${parameter_name} | jq -r .Parameter.Value")
+}
+
+function configure_gp2gp_adaptor_service_auth_keys {
+  parameter_name="/repo/${NHS_ENVIRONMENT}/user-input/gp2gp-adaptor-authorization-keys"
+  echo "${parameter_name}"
+  export GP2GP_ADAPTOR_AUTHORIZATION_KEYS=$(dojo -c Dojofile-infra "aws ssm get-parameter --with-decryption --region ${AWS_DEFAULT_REGION} --name  ${parameter_name} | jq -r .Parameter.Value")
+}
+
 function configure_ehr_repo_service_auth_keys {
   parameter_name="/repo/${NHS_ENVIRONMENT}/user-input/ehr-repo-authorization-keys"
   echo "${parameter_name}"
@@ -133,6 +145,8 @@ case "${command}" in
       get_aws_account_id
       configure_repo_to_gp_service_auth_keys
       configure_ehr_repo_service_auth_keys
+      configure_gp_to_repo_service_auth_keys
+      configure_gp2gp_adaptor_service_auth_keys
       configure_mhs_inbound_url
       dojo "./tasks _test_e2e"
       ;;
@@ -148,6 +162,8 @@ case "${command}" in
       configure_queue_access
       configure_repo_to_gp_service_auth_keys
       configure_ehr_repo_service_auth_keys
+      configure_gp_to_repo_service_auth_keys
+      configure_gp2gp_adaptor_service_auth_keys
       configure_mhs_inbound_url
       dojo "./tasks _test_e2e_test_harness"
       ;;
