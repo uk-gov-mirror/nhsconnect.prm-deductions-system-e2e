@@ -39,6 +39,7 @@ pipelines:
                       - -c
                       - ./tasks test_lint
             test_e2e:
+              timeout: 15
               resources:
                 - deductions-private
                 - dev
@@ -87,6 +88,7 @@ pipelines:
                       - -c
                       - ./tasks test_lint
             test_e2e:
+              timeout: 15
               resources:
                 - deductions-private
                 - test
