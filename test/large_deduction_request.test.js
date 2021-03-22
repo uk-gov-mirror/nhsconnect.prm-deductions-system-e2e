@@ -62,7 +62,7 @@ describe('largeDeductionRequest', () => {
       expect(body).toContain(conversationId.toUpperCase());
       done();
     });
-  }, 10000);
+  }, 20000);
 });
 
 const getAndValidatePatientPdsDetails = async nhsNumber => {
