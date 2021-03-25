@@ -31,6 +31,7 @@ describe('largeDeductionRequest', () => {
     // trigger deduction in gp to repo from test harness/gp practice
     const conversationId = await makeDeductionRequest(nhsNumber);
     const messageId = v4();
+    const attachmentId = v4();
     console.log(`Triggered deduction request, ConversationID: ${conversationId}`);
 
     // Create large message response
@@ -38,7 +39,8 @@ describe('largeDeductionRequest', () => {
       conversationId,
       nhsNumber,
       testHarnessOdsCode,
-      messageId
+      messageId,
+      attachmentId
     );
     console.log('Generated large health record');
 
@@ -140,12 +142,13 @@ const makeDeductionRequest = async nhsNumber => {
   }
 };
 
-const generateLargeHealthRecordExtract = (conversationId, nhsNumber, odsCode, messageId) => {
+const generateLargeHealthRecordExtract = (conversationId, nhsNumber, odsCode, messageId, attachmentId) => {
   return largeHealthRecordExtractTemplate
     .replace('${conversationId}', conversationId)
     .replace('${nhsNumber}', nhsNumber)
     .replace('${odsCode}', odsCode)
-    .replace('${messageId}', messageId);
+    .replace('${messageId}', messageId)
+    .replace('${attachmentId}', attachmentId);
 };
 
 const sleep = ms => {
