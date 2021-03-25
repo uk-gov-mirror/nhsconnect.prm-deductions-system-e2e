@@ -1,5 +1,6 @@
 import { largeHealthRecordExtractTemplate } from './data/large_ehr_extract';
 import { config } from '../config';
+import { v4 } from 'uuid';
 import axios from 'axios';
 import adapter from 'axios/lib/adapters/http';
 import { connectToQueueAndAssert } from '../utils/queue/handle-queue';
@@ -29,13 +30,15 @@ describe('largeDeductionRequest', () => {
 
     // trigger deduction in gp to repo from test harness/gp practice
     const conversationId = await makeDeductionRequest(nhsNumber);
+    const messageId = v4();
     console.log(`Triggered deduction request, ConversationID: ${conversationId}`);
 
     // Create large message response
     const largeHealthRecordExtract = generateLargeHealthRecordExtract(
       conversationId,
       nhsNumber,
-      testHarnessOdsCode
+      testHarnessOdsCode,
+      messageId
     );
     console.log('Generated large health record');
 
@@ -62,7 +65,7 @@ describe('largeDeductionRequest', () => {
       expect(body).toContain(conversationId.toUpperCase());
       done();
     });
-  }, 20000);
+  }, 50000);
 });
 
 const getAndValidatePatientPdsDetails = async nhsNumber => {
@@ -141,7 +144,8 @@ const generateLargeHealthRecordExtract = (conversationId, nhsNumber, odsCode) =>
   return largeHealthRecordExtractTemplate
     .replace('${conversationId}', conversationId)
     .replace('${nhsNumber}', nhsNumber)
-    .replace('${odsCode}', odsCode);
+    .replace('${odsCode}', odsCode)
+    .replace('${messageId}', messageId);
 };
 
 const sleep = ms => {
