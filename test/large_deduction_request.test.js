@@ -140,7 +140,7 @@ const makeDeductionRequest = async nhsNumber => {
   }
 };
 
-const generateLargeHealthRecordExtract = (conversationId, nhsNumber, odsCode) => {
+const generateLargeHealthRecordExtract = (conversationId, nhsNumber, odsCode, messageId) => {
   return largeHealthRecordExtractTemplate
     .replace('${conversationId}', conversationId)
     .replace('${nhsNumber}', nhsNumber)
